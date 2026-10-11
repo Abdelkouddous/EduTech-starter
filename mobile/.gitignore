@@ -1,0 +1,21 @@
+# Flutter / Dart build artifacts
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# FVM (Ignore symlinked SDK, keep fvm_config.json)
+.fvm/flutter_sdk
+
+# Android / iOS generated builds
+android/.gradle
+android/captures/
+android/gradlew
+android/gradlew.bat
+ios/.symlinks/
+ios/Pods/
+ios/Podfile.lock
+
+# Environment secrets
+.env

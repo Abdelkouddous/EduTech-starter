@@ -1,0 +1,10 @@
+{
+  "workbench.startupEditor": "readme",
+  "dart.projectSearchPaths": [
+    "mobile"
+  ],
+  "dart.flutterSdkPath": "mobile/.fvm/flutter_sdk",
+  "search.exclude": {
+    "**/mobile/.fvm": true
+  }
+}

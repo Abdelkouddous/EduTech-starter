@@ -1,0 +1,131 @@
+# 🎓 EduTech Starter Pack — منصة التدريب والأكاديميات الإلكترونية (Single-Tenant Boilerplate)
+
+حزمة بداية متكاملة وقابلة لإعادة الاستخدام مخصصة للمستقلين (Freelancers) والشركات لإنشاء وإطلاق منصات الأكاديميات والمدارس والمعاهد التعليمية المستقلة في دقائق معدودة.
+
+تعتمد المنصة على بنية **API-First Decoupled Architecture**:
+* **الواجهة الخلفية (Backend)**: Laravel 11 + Sanctum + Spatie Roles/Permissions + SQLite/MySQL + DomPDF.
+* **الواجهة الأمامية (Web Frontend)**: React 19 + TypeScript + Vite + TailwindCSS.
+* **تطبيق الموبايل (Mobile App)**: Flutter + FVM + Riverpod 2.x + Dio + SecureStorage.
+* **التجهيز السريع (DevOps)**: Docker Compose + Nginx Reverse Proxy + Makefile.
+
+---
+
+## 🚀 ملخص التذاكر المنجزة (Sprints EDU-01 → EDU-06)
+
+| التذكرة | الوحدة البرمجية | الإنجازات والخصائص المعمارية |
+| :--- | :--- | :--- |
+| **EDU-01** | **الهيكل الأكاديمي وصلاحيات الوصول** | نظام الفصول الدراسية (`AcademicTerms`)، الدفعات (`Cohorts`)، الدورات والوحدات والدروس، ونظام إعلانات المدرب مع روابط Google Meet/Zoom المباشرة. |
+| **EDU-02** | **محرك التخصيص الديناميكي (White-Label)** | نقطة نهاية `/api/v1/institute/bootstrap` لجلب هوية الأكاديمية (الشعار، الألوان، العملة، أرقام التواصل) مع التخزين المؤقت المتقدم. |
+| **EDU-03** | **بوابة الدفع ومراجعة الإيصالات اليدوية** | استقبال وتدقيق إيصالات الدفع اليدوية (InstaPay, Vodafone Cash, Fawry) مع مسار اعتماد ورفض، وتفعيل الوصول التلقائي للمتدرب. |
+| **EDU-04** | **طبقة حماية وبث الفيديو ومحركات العرض** | واجهة تجريد لمشغلات الفيديو (`VideoDriverInterface`) تدعم التضمين الخارجي (YouTube/Vimeo) ورمز التشفير اللحظي (Bunny.net HLS Token Signed URLs). |
+| **EDU-05** | **تتبع تقدم المتدرب ومولد الشهادات المعتمدة** | تتبع إنجاز الدروس، إعادة احتساب النسبة المئوية تلقائياً، وتوليد شهادات PDF أفقية باللغة العربية مع كود تحقق رقمي رسمي. |
+| **EDU-06** | **بيئة التشغيل المجهزة والتوثيق الشامل** | إعداد `Dockerfile`, `docker-compose.yml`, `nginx.conf`, و `Makefile` لتشغيل ونشر الأكاديمية بأمر واحد. |
+
+---
+
+## 🛠️ متطلبات التشغيل السريع (Quickstart)
+
+### 1. التشغيل المحلي المباشر (Local Environment)
+```bash
+# تثبيت الاعتماديات وتجهيز قاعدة البيانات الأولية
+make setup
+
+# تشغيل خادم Laravel الخلفي وخادم Vite الأمامي
+make dev
+```
+* **رابط الواجهة الأمامية**: `http://localhost:5173`
+* **رابط الواجهة الخلفية (API)**: `http://localhost:8000/api/v1`
+
+### 2. التشغيل عبر حاويات Docker (Turnkey Containerization)
+```bash
+make docker
+```
+* المنصة ستكون متاحة على: `http://localhost:8080` مع توجيه الـ Reverse Proxy عبر Nginx.
+
+### 3. تشغيل تطبيق الموبايل الافتراضي (Flutter & FVM)
+```bash
+# إعداد البيئة الافتراضية وتثبيت إصدار Flutter وحزم Riverpod
+make mobile-setup
+
+# تشغيل التطبيق على المحاكي عبر FVM
+make mobile
+```
+
+---
+
+## 🔑 بيانات الدخول التجريبية (Demo Credentials)
+
+| الدور (Role) | البريد الإلكتروني | كلمة المرور | الصلاحيات |
+| :--- | :--- | :--- | :--- |
+| **مدير الأكاديمية (Admin)** | `admin@academy.com` | `password123` | إدارة الإعدادات، اعتماد الإيصالات، إنشاء الدفعات |
+| **مدرب (Instructor)** | `tarek@academy.com` | `password123` | إدارة المحتوى، نشر إعلانات وروابط اللقاءات الحية |
+| **مدربة (Instructor)** | `sara@academy.com` | `password123` | إدارة مسارات الذكاء الاصطناعي والبيانات |
+| **متدرب (Trainee)** | `mahmoud@gmail.com` | `password123` | متدرب مسجل بدفعة الويب ويمتلك وصول كامل |
+| **متدربة (Trainee)** | `aya@gmail.com` | `password123` | متدربة جديدة لاختبار دورة التسجيل ورفع الإيصال |
+
+---
+
+## 🎨 دليل إعادة التخصيص لعميل جديد في 5 دقائق (White-Labeling Guide)
+
+لتسليم المنصة لمعهد أو مدرسة أو مركز تدريب جديد، لا تحتاج لتعديل كود الـ React:
+1. افتح لوحة التحكم أو قم بتعديل ملف الإعدادات في `backend/database/seeders/DatabaseSeeder.php` أو عبر استدعاء:
+   ```http
+   PUT /api/v1/admin/institute/settings
+   Authorization: Bearer <ADMIN_TOKEN>
+   Content-Type: application/json
+
+   {
+     "settings": {
+       "institute_name": "معهد المستقبل العالي للتدريب",
+       "primary_color": "#10b981",
+       "accent_color": "#6366f1",
+       "currency_symbol": "ر.س",
+       "currency_code": "SAR"
+     }
+   }
+   ```
+2. تقوم واجهة الـ React باستدعاء `/api/v1/institute/bootstrap` عند بدء التشغيل وتطبيق الهوية فوراً.
+
+---
+
+## 📡 جدول واجهات برمجة التطبيقات (API Reference)
+
+### 1. إعدادات الهوية والمصادقة (Identity & Auth)
+* `GET  /api/v1/institute/bootstrap` — استرجاع هوية الأكاديمية وإعدادات الدفع والفصول النشطة.
+* `POST /api/v1/auth/register` — تسجيل حساب متدرب جديد.
+* `POST /api/v1/auth/login` — تسجيل الدخول واستخراج رمز Sanctum Token.
+* `GET  /api/v1/auth/me` — استرجاع الملف الشخصي للمستخدم الحالي.
+
+### 2. الكتالوج الأكاديمي والدروس (Courses & Streaming)
+* `GET  /api/v1/courses` — تصفح الدورات المنشورة مع تصفية التصنيفات والبحث.
+* `GET  /api/v1/courses/{slug}` — عرض التفاصيل الكاملة للدورة، الوحدات، الدروس، والدفعات.
+* `GET  /api/v1/lessons/{id}/play` — تشغيل الدرس (يسمح بالمعاينة المجانية، ويشترط الاشتراك المعتمد للدروس المدفوعة).
+
+### 3. الدفعات والإعلانات وروابط الجلسات (Cohorts & Live Links)
+* `GET  /api/v1/cohorts/{cohortId}/announcements` — عرض إعلانات وروابط اللقاءات للمتدربين المسجلين فقط.
+* `POST /api/v1/cohorts/{cohortId}/announcements` — نشر إعلان ورابط جلسة مباشرة (خاص بالمدرب والمدير).
+
+### 4. الإيصالات والاشتراكات (Payments & Audit)
+* `POST /api/v1/payments/submit-receipt` — رفع المتدرب لصورة إيصال الدفع اليدوي (InstaPay/Vodafone Cash).
+* `GET  /api/v1/payments/my-receipts` — قائمة إيصالات المتدرب الحالية وحالتها.
+* `GET  /api/v1/admin/payments/receipts` — (Admin) قائمة الإيصالات المعلقة وتفاصيلها.
+* `POST /api/v1/admin/payments/receipts/{id}/review` — (Admin) اعتماد أو رفض الإيصال وتفعيل وصول الطالب.
+
+### 5. التقدم والشهادات الرقمية (Progress & Certificates)
+* `GET  /api/v1/my-courses` — قائمة دورات المتدرب ونسبة الإنجاز الحالية.
+* `POST /api/v1/lessons/{id}/complete` — تحديد إتمام الدرس وتحديث النسبة (وإصدار الشهادة عند 100%).
+* `GET  /api/v1/certificates/{code}` — التحقق العام من صحة الشهادة.
+* `GET  /api/v1/certificates/{code}/download` — تحميل الشهادة بتنسيق PDF عالي الدقة.
+
+---
+
+## 🧪 الاختبارات وضمان الجودة (Automated Testing)
+
+تشغيل الحزمة الكاملة للاختبارات للتأكد من سلامة الصلاحيات ومسارات الدفع وتوليد الرموز:
+```bash
+make test
+# أو من داخل مجلد backend:
+php artisan test
+```
+
+جميع الاختبارات تجري بنجاح مع تأكيد حماية الدروس المدفوعة وصحة عمليات الاعتماد.

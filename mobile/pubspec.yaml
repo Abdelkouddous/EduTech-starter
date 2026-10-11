@@ -1,0 +1,38 @@
+name: edutech_mobile
+description: "Professional Single-Tenant EduTech Starter Mobile App with Flutter, FVM & Riverpod"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  
+  # State Management
+  flutter_riverpod: ^2.6.1
+
+  # Network & API
+  dio: ^5.7.0
+
+  # Secure Storage for Sanctum Bearer Tokens
+  flutter_secure_storage: ^9.2.2
+
+  # Media & File Picking (Payment Receipts)
+  image_picker: ^1.1.2
+  cached_network_image: ^3.4.1
+
+  # Utilities & Formatting
+  intl: ^0.20.0
+  google_fonts: ^6.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
