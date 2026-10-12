@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'core/localization/language_provider.dart';
 import 'core/theme/theme_provider.dart';
 import 'features/courses/screens/home_screen.dart';
 import 'features/enrollments/screens/my_courses_screen.dart';
@@ -18,15 +19,16 @@ class EduTechApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeData = ref.watch(appThemeDataProvider);
+    final langState = ref.watch(languageProvider);
 
     return MaterialApp(
-      title: 'أكاديمية التعلم',
+      title: 'EduTech Starter',
       debugShowCheckedModeBanner: false,
       theme: themeData,
-      locale: const Locale('ar'),
+      locale: langState.locale,
       supportedLocales: const [
         Locale('ar'),
-        Locale('en'),
+        Locale('fr'),
       ],
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
@@ -38,14 +40,14 @@ class EduTechApp extends ConsumerWidget {
   }
 }
 
-class MainNavigationScreen extends StatefulWidget {
+class MainNavigationScreen extends ConsumerStatefulWidget {
   const MainNavigationScreen({super.key});
 
   @override
-  State<MainNavigationScreen> createState() => _MainNavigationScreenState();
+  ConsumerState<MainNavigationScreen> createState() => _MainNavigationScreenState();
 }
 
-class _MainNavigationScreenState extends State<MainNavigationScreen> {
+class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = const [
@@ -56,28 +58,31 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final langState = ref.watch(languageProvider);
+    final langNotifier = ref.read(languageProvider.notifier);
+
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: langState.direction,
       child: Scaffold(
         body: _screens[_currentIndex],
         bottomNavigationBar: NavigationBar(
           selectedIndex: _currentIndex,
           onDestinationSelected: (index) => setState(() => _currentIndex = index),
-          destinations: const [
+          destinations: [
             NavigationDestination(
-              icon: Icon(Icons.school_outlined),
-              selectedIcon: Icon(Icons.school),
-              label: 'الرئيسية',
+              icon: const Icon(Icons.school_outlined),
+              selectedIcon: const Icon(Icons.school),
+              label: langNotifier.t('home'),
             ),
             NavigationDestination(
-              icon: Icon(Icons.menu_book_outlined),
-              selectedIcon: Icon(Icons.menu_book),
-              label: 'دوراتي',
+              icon: const Icon(Icons.menu_book_outlined),
+              selectedIcon: const Icon(Icons.menu_book),
+              label: langNotifier.t('myCourses'),
             ),
             NavigationDestination(
-              icon: Icon(Icons.person_outline),
-              selectedIcon: Icon(Icons.person),
-              label: 'الملف والشهادات',
+              icon: const Icon(Icons.person_outline),
+              selectedIcon: const Icon(Icons.person),
+              label: langNotifier.t('profile'),
             ),
           ],
         ),

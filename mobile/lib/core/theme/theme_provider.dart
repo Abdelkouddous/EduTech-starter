@@ -12,10 +12,10 @@ class InstituteThemeState {
   final bool isLoading;
 
   const InstituteThemeState({
-    this.instituteName = 'أكاديمية التعلم',
+    this.instituteName = 'EduTech Starter',
     this.primaryColor = const Color(0xFF2563EB),
     this.accentColor = const Color(0xFFF59E0B),
-    this.currencySymbol = 'ج.م',
+    this.currencySymbol = 'د.ج',
     this.offlinePaymentMethods = const {},
     this.isLoading = true,
   });

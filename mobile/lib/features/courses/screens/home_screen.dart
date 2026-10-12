@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/localization/language_provider.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/courses_provider.dart';
@@ -13,10 +14,12 @@ class HomeScreen extends ConsumerWidget {
     final themeState = ref.watch(themeProvider);
     final authState = ref.watch(authProvider);
     final coursesAsync = ref.watch(coursesListProvider);
+    final langState = ref.watch(languageProvider);
+    final langNotifier = ref.read(languageProvider.notifier);
 
     return Scaffold(
       body: Directionality(
-        textDirection: TextDirection.rtl,
+        textDirection: langState.direction,
         child: SafeArea(
           child: CustomScrollView(
             slivers: [
@@ -45,21 +48,49 @@ class HomeScreen extends ConsumerWidget {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          if (authState.isAuthenticated)
-                            CircleAvatar(
-                              backgroundColor: Colors.white24,
-                              child: Text(
-                                authState.user!.name.isNotEmpty ? authState.user!.name[0] : 'U',
-                                style: const TextStyle(color: Colors.white),
+                          Row(
+                            children: [
+                              InkWell(
+                                onTap: () => langNotifier.toggleLanguage(),
+                                borderRadius: BorderRadius.circular(16),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withAlpha(51),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(color: Colors.white.withAlpha(76)),
+                                  ),
+                                  child: Text(
+                                    langNotifier.t('switchLang'),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
+                              if (authState.isAuthenticated) ...[
+                                const SizedBox(width: 8),
+                                CircleAvatar(
+                                  backgroundColor: Colors.white24,
+                                  child: Text(
+                                    authState.user!.name.isNotEmpty ? authState.user!.name[0] : 'U',
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
                         ],
                       ),
                       const SizedBox(height: 6),
                       Text(
                         authState.isAuthenticated
-                            ? 'أهلاً بك، ${authState.user!.name}'
-                            : 'صرح التدريب والتأهيل المهني المعتمد',
+                            ? (langState.isArabic
+                                ? 'أهلاً بك، ${authState.user!.name}'
+                                : 'Bienvenue, ${authState.user!.name}')
+                            : langNotifier.t('appTagline'),
                         style: const TextStyle(color: Colors.white70, fontSize: 13),
                       ),
                     ],
@@ -68,12 +99,12 @@ class HomeScreen extends ConsumerWidget {
               ),
 
               // Catalog Header
-              const SliverToBoxAdapter(
+              SliverToBoxAdapter(
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(16, 20, 16, 10),
+                  padding: const EdgeInsets.fromLTRB(16, 20, 16, 10),
                   child: Text(
-                    'البرامج والدبلومات التدريبية المتاحة',
-                    style: TextStyle(
+                    langState.isArabic ? 'البرامج والدبلومات التدريبية المتاحة' : 'Formations & Programmes Disponibles',
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF1E293B),

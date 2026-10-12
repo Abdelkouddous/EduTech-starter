@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/localization/language_provider.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../providers/auth_provider.dart';
 import 'register_screen.dart';
@@ -49,13 +50,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final theme = ref.watch(themeProvider);
     final auth = ref.watch(authProvider);
+    final lang = ref.watch(languageProvider);
+    final langNotifier = ref.read(languageProvider.notifier);
 
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: lang.direction,
       child: Scaffold(
         backgroundColor: Colors.grey.shade50,
         appBar: AppBar(
-          title: const Text('تسجيل الدخول', style: TextStyle(fontWeight: FontWeight.bold)),
+          title: Text(langNotifier.t('login'), style: const TextStyle(fontWeight: FontWeight.bold)),
           centerTitle: true,
           elevation: 0,
         ),

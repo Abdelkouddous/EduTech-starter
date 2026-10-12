@@ -12,8 +12,10 @@ import {
   Menu,
   X,
   CreditCard,
-  Sparkles
+  Sparkles,
+  Languages
 } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface HeaderProps {
   currentTab: string;
@@ -31,16 +33,17 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenAIChat
 }) => {
   const { currentUser, activeRole, logout } = useAuth();
+  const { language, toggleLanguage, t } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   const navItems = [
-    { id: 'home', label: 'الرئيسية', icon: <BookOpen className="w-4 h-4" /> },
-    { id: 'courses', label: 'الدورات التدريبية', icon: <GraduationCap className="w-4 h-4" /> },
-    { id: 'services', label: 'الخدمات', icon: <CreditCard className="w-4 h-4" /> },
-    { id: 'about', label: 'عن الأكاديمية', icon: <Info className="w-4 h-4" /> },
-    { id: 'faq', label: 'الأسئلة الشائعة', icon: <HelpCircle className="w-4 h-4" /> },
-    { id: 'contact', label: 'اتصل بنا', icon: <PhoneCall className="w-4 h-4" /> },
+    { id: 'home', label: t('navHome'), icon: <BookOpen className="w-4 h-4" /> },
+    { id: 'courses', label: t('navCourses'), icon: <GraduationCap className="w-4 h-4" /> },
+    { id: 'services', label: t('navServices'), icon: <CreditCard className="w-4 h-4" /> },
+    { id: 'about', label: t('navAbout'), icon: <Info className="w-4 h-4" /> },
+    { id: 'faq', label: t('navFAQ'), icon: <HelpCircle className="w-4 h-4" /> },
+    { id: 'contact', label: t('navContact'), icon: <PhoneCall className="w-4 h-4" /> },
   ];
 
   const handleNavClick = (id: string) => {
@@ -63,12 +66,14 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
             <div>
               <div className="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-1.5">
-                أكاديمية التعلم
-                <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-bold border border-indigo-100">
-                  الاعتماد المباشر
+                EduTech Starter
+                <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">
+                  🇩🇿 Algérie
                 </span>
               </div>
-              <div className="text-xs text-slate-500 font-medium">منصة التدريب والتأهيل الرقمي</div>
+              <div className="text-xs text-slate-500 font-medium">
+                {language === 'ar' ? 'منصة التدريب والتأهيل الرقمي' : "Plateforme d'Apprentissage & Formation"}
+              </div>
             </div>
           </div>
 
@@ -94,7 +99,17 @@ export const Header: React.FC<HeaderProps> = ({
           </nav>
 
           {/* Right Action Controls */}
-          <div className="hidden lg:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-2.5">
+            {/* Bilingual Switcher AR / FR */}
+            <button
+              onClick={toggleLanguage}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 hover:border-slate-300 bg-slate-50 hover:bg-slate-100 text-xs font-bold text-slate-700 transition-all cursor-pointer shadow-xs"
+              title={language === 'ar' ? 'Passer en Français' : 'التحويل إلى العربية'}
+            >
+              <Languages className="w-4 h-4 text-indigo-600" />
+              <span>{language === 'ar' ? 'FR 🇫🇷' : 'عربي 🇩🇿'}</span>
+            </button>
+
             {/* AI Assistant Button */}
             {onOpenAIChat && (
               <button

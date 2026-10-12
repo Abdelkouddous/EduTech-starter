@@ -29,9 +29,12 @@ import { FloatingChatbotWidget } from './components/ai/FloatingChatbotWidget';
 
 import { useData } from './context/DataContext';
 
+import { useLanguage } from './context/LanguageContext';
+
 const MainAppContent: React.FC = () => {
   const { activeRole } = useAuth();
   const { courses } = useData();
+  const { dir, t } = useLanguage();
 
   const [currentTab, setCurrentTab] = useState<string>('home');
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -67,15 +70,15 @@ const MainAppContent: React.FC = () => {
         <div className="w-16 h-16 rounded-3xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center animate-pulse mb-5 shadow-lg">
           <GraduationCap className="w-8 h-8 text-indigo-400" />
         </div>
-        <h1 className="text-xl font-black text-slate-100 tracking-tight">أكاديمية التعلم</h1>
-        <p className="text-xs text-slate-400 mt-1">صرح التدريب والتأهيل المهني المعتمد</p>
+        <h1 className="text-xl font-black text-slate-100 tracking-tight">EduTech Starter</h1>
+        <p className="text-xs text-slate-400 mt-1">Plateforme d'Apprentissage & Formation Certifiée 🇩🇿</p>
         <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mt-6" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 font-sans text-slate-900" dir="rtl">
+    <div className="min-h-screen flex flex-col bg-slate-50 font-sans text-slate-900" dir={dir}>
       
       {/* Floating Demo Role Switcher Bar */}
       <DemoRoleSwitcher onSwitchTab={tab => setCurrentTab(tab)} />

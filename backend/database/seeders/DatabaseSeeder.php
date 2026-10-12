@@ -29,36 +29,36 @@ class DatabaseSeeder extends Seeder
 
         // 2. White-Label Settings (EDU-02)
         $settings = [
-            'institute_name' => 'أكاديمية التعلم - منصة التدريب الإلكتروني',
-            'institute_tagline' => 'صرح التدريب والتعليم المهني المعتمد للأفراد والمؤسسات',
-            'institute_description' => 'منصة متخصصة في تقديم دبلومات تدريبية مكثفة وبرامج تأهيل مهني متوافقة مع متطلبات سوق العمل.',
+            'institute_name' => 'EduTech Starter',
+            'institute_tagline' => "Plateforme d'Apprentissage & Formation Professionnelle | منصة التدريب والتأهيل الإلكتروني",
+            'institute_description' => 'Plateforme complète de formation professionnelle et de certifications pour instituts et académies.',
             'primary_color' => '#2563eb',
-            'accent_color' => '#f59e0b',
+            'accent_color' => '#10b981',
             'logo_url' => '/assets/logo.png',
-            'currency_code' => 'EGP',
-            'currency_symbol' => 'ج.م',
-            'contact_email' => 'admin@academy.com',
-            'contact_phone' => '+20 100 123 4567',
-            'whatsapp_number' => '+201001234567',
+            'currency_code' => 'DZD',
+            'currency_symbol' => 'د.ج',
+            'contact_email' => 'contact@edutech-starter.com',
+            'contact_phone' => '+213 555 123 456',
+            'whatsapp_number' => '+213555123456',
             'default_video_driver' => 'embedded', // embedded, youtube, vimeo, bunny
             'allow_manual_receipts' => true,
             'allow_announcement_feeds' => true,
             'auto_issue_certificates' => true,
             'offline_payment_methods' => [
-                'instapay' => [
-                    'name' => 'InstaPay (إنستاباي)',
-                    'account' => 'academy@instapay',
-                    'receiver' => 'أكاديمية التعلم للتدريب والتطوير'
+                'baridimob' => [
+                    'name' => 'BaridiMob (بريدي موب)',
+                    'account' => 'RIP: 00799999000123456789',
+                    'receiver' => 'EduTech Starter Algérie'
                 ],
-                'vodafone_cash' => [
-                    'name' => 'Vodafone Cash (فودافون كاش)',
-                    'account' => '01001234567',
-                    'receiver' => 'حساب التحويلات المالية للأكاديمية'
+                'ccp' => [
+                    'name' => 'Compte CCP (الحساب البريدي الجاري)',
+                    'account' => 'CCP: 12345678 Clé 99',
+                    'receiver' => 'Algérie Poste - EduTech Starter'
                 ],
-                'fawry' => [
-                    'name' => 'Fawry (فوري)',
-                    'account' => '98452',
-                    'receiver' => 'كود خدمة أكاديمية التعلم'
+                'edahabia' => [
+                    'name' => 'Carte Edahabia / CIB (البطاقة الذهبية)',
+                    'account' => 'Virement Bancaire / CIB',
+                    'receiver' => 'Paiement Sécurisé'
                 ]
             ]
         ];

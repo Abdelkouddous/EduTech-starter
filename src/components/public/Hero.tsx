@@ -1,5 +1,6 @@
 import React from 'react';
 import { GraduationCap, ShieldCheck, Award, Users, Search, ArrowLeft } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface HeroProps {
   onSearch: (term: string) => void;
@@ -8,6 +9,7 @@ interface HeroProps {
 }
 
 export const Hero: React.FC<HeroProps> = ({ onSearch, onExploreCourses, onOpenRegister }) => {
+  const { t, dir } = useLanguage();
   const [searchTerm, setSearchTerm] = React.useState('');
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -26,20 +28,20 @@ export const Hero: React.FC<HeroProps> = ({ onSearch, onExploreCourses, onOpenRe
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           
-          {/* Left Column Text (RTL Right) */}
-          <div className="lg:col-span-7 space-y-6 text-right">
+          {/* Main Column */}
+          <div className={`lg:col-span-7 space-y-6 ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>
             
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 text-xs font-bold">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>أكاديمية التدريب والتأهيل المعتمدة رسمياً</span>
+              <span>{t('heroBadge')}</span>
             </div>
 
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white leading-tight">
-              طور مهاراتك مع أقوى <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-indigo-300 to-emerald-300">الدورات التدريبية المعتمدة</span>
+              {t('heroTitle')}
             </h1>
 
             <p className="text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl font-normal">
-              منصة تدريب إلكترونية متخصصة تقدم برامج عملية في البرمجة، تحليل البيانات، الذكاء الاصطناعي والتسويق مع شهادات معتمدة وتسهيلات دفع يدوي عبر InstaPay و Vodafone Cash و Fawry.
+              {t('heroSubtitle')}
             </p>
 
             {/* Course Search Bar */}

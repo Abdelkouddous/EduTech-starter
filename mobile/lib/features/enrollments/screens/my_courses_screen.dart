@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/localization/language_provider.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -16,12 +17,18 @@ class MyCoursesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeState = ref.watch(themeProvider);
     final authState = ref.watch(authProvider);
+    final langState = ref.watch(languageProvider);
+    final langNotifier = ref.read(languageProvider.notifier);
 
     if (!authState.isAuthenticated) {
       return Scaffold(
-        appBar: AppBar(title: const Text('دوراتي التدريبية')),
-        body: const Center(
-          child: Text('يرجى تسجيل الدخول أولاً لعرض دوراتك ونسبة إنجازك.'),
+        appBar: AppBar(title: Text(langNotifier.t('myCourses'))),
+        body: Center(
+          child: Text(
+            langState.isArabic
+                ? 'يرجى تسجيل الدخول أولاً لعرض دوراتك ونسبة إنجازك.'
+                : 'Veuillez vous connecter pour voir vos cours et votre progression.',
+          ),
         ),
       );
     }
@@ -30,10 +37,10 @@ class MyCoursesScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('دوراتي التدريبية'),
+        title: Text(langNotifier.t('myCourses')),
       ),
       body: Directionality(
-        textDirection: TextDirection.rtl,
+        textDirection: langState.direction,
         child: enrollmentsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (err, _) => Center(child: Text('خطأ في تحميل الدورات: $err')),

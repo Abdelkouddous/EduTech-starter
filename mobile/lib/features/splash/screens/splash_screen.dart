@@ -109,7 +109,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
                 child: Column(
                   children: [
                     Text(
-                      theme.instituteName.isNotEmpty ? theme.instituteName : 'أكاديمية التعلم',
+                      theme.instituteName.isNotEmpty ? theme.instituteName : 'EduTech Starter',
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         fontSize: 22,
@@ -120,7 +120,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'صرح التدريب والتأهيل الإلكتروني المعتمد',
+                      'منصة التدريب والتأهيل الإلكتروني المعتمد 🇩🇿',
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey.shade500,
@@ -143,7 +143,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
               ),
               const SizedBox(height: 12),
               Text(
-                'جارٍ تهيئة المنصة...',
+                'Chargement / جارٍ التحضير...',
                 style: TextStyle(
                   fontSize: 11,
                   color: Colors.grey.shade400,

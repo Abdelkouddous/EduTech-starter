@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/localization/language_provider.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -91,18 +92,27 @@ class _ProfileHubScreenState extends ConsumerState<ProfileHubScreen> {
   Widget build(BuildContext context) {
     final theme = ref.watch(themeProvider);
     final auth = ref.watch(authProvider);
+    final lang = ref.watch(languageProvider);
+    final langNotifier = ref.read(languageProvider.notifier);
 
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: lang.direction,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('الملف الأكاديمي والشهادات', style: TextStyle(fontWeight: FontWeight.bold)),
+          title: Text(langNotifier.t('profile'), style: const TextStyle(fontWeight: FontWeight.bold)),
           centerTitle: true,
           elevation: 0,
+          leading: TextButton(
+            onPressed: () => langNotifier.toggleLanguage(),
+            child: Text(
+              langNotifier.t('switchLang'),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+            ),
+          ),
           actions: [
             if (auth.isAuthenticated)
               IconButton(
-                tooltip: 'تسجيل الخروج',
+                tooltip: langNotifier.t('logout'),
                 icon: const Icon(Icons.logout_rounded, color: Colors.redAccent),
                 onPressed: () async {
                   await ref.read(authProvider.notifier).logout();
