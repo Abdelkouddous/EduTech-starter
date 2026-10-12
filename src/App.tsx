@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { DataProvider } from './context/DataContext';
 import { Course } from './types';
+import { GraduationCap } from 'lucide-react';
 
 import { DemoRoleSwitcher } from './components/common/DemoRoleSwitcher';
 import { Header } from './components/layout/Header';
@@ -44,6 +45,13 @@ const MainAppContent: React.FC = () => {
   const [selectedCourseForPayment, setSelectedCourseForPayment] = useState<Course | null>(null);
   const [isAIChatOpen, setIsAIChatOpen] = useState(false);
 
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsInitialLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
+
   const handleEnrollCourse = (course: Course) => {
     setSelectedCourseForPayment(course);
   };
@@ -52,6 +60,19 @@ const MainAppContent: React.FC = () => {
     setSelectedCourseForPayment(null);
     setCurrentTab('dashboard');
   };
+
+  if (isInitialLoading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center text-white" dir="rtl">
+        <div className="w-16 h-16 rounded-3xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center animate-pulse mb-5 shadow-lg">
+          <GraduationCap className="w-8 h-8 text-indigo-400" />
+        </div>
+        <h1 className="text-xl font-black text-slate-100 tracking-tight">أكاديمية التعلم</h1>
+        <p className="text-xs text-slate-400 mt-1">صرح التدريب والتأهيل المهني المعتمد</p>
+        <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mt-6" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 font-sans text-slate-900" dir="rtl">

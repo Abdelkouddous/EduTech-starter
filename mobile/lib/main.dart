@@ -5,6 +5,7 @@ import 'core/theme/theme_provider.dart';
 import 'features/courses/screens/home_screen.dart';
 import 'features/enrollments/screens/my_courses_screen.dart';
 import 'features/profile/screens/profile_hub_screen.dart';
+import 'features/splash/screens/splash_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,7 +33,7 @@ class EduTechApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: const MainNavigationScreen(),
+      home: const SplashScreen(),
     );
   }
 }

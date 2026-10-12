@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/theme/theme_provider.dart';
+import '../../auth/providers/auth_provider.dart';
+import '../../auth/screens/login_screen.dart';
+import '../../auth/screens/register_screen.dart';
 
 class ProfileHubScreen extends ConsumerStatefulWidget {
   const ProfileHubScreen({super.key});
@@ -87,6 +90,7 @@ class _ProfileHubScreenState extends ConsumerState<ProfileHubScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = ref.watch(themeProvider);
+    final auth = ref.watch(authProvider);
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -95,6 +99,17 @@ class _ProfileHubScreenState extends ConsumerState<ProfileHubScreen> {
           title: const Text('الملف الأكاديمي والشهادات', style: TextStyle(fontWeight: FontWeight.bold)),
           centerTitle: true,
           elevation: 0,
+          actions: [
+            if (auth.isAuthenticated)
+              IconButton(
+                tooltip: 'تسجيل الخروج',
+                icon: const Icon(Icons.logout_rounded, color: Colors.redAccent),
+                onPressed: () async {
+                  await ref.read(authProvider.notifier).logout();
+                  _fetchProfileData();
+                },
+              ),
+          ],
         ),
         body: _isLoading
             ? const Center(child: CircularProgressIndicator())
@@ -106,8 +121,8 @@ class _ProfileHubScreenState extends ConsumerState<ProfileHubScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Profile Card
-                      _buildProfileCard(theme),
+                      // Profile Card or Guest Auth Banner
+                      _buildProfileCard(theme, auth),
                       const SizedBox(height: 16),
 
                       // Metric Stats Grid
@@ -129,8 +144,103 @@ class _ProfileHubScreenState extends ConsumerState<ProfileHubScreen> {
     );
   }
 
-  Widget _buildProfileCard(InstituteThemeState theme) {
-    final profile = _data?['profile'] ?? {};
+  Widget _buildProfileCard(InstituteThemeState theme, AuthState auth) {
+    if (!auth.isAuthenticated) {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.indigo.shade100),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.indigo.withValues(alpha: 0.05),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 28,
+                  backgroundColor: theme.primaryColor.withValues(alpha: 0.1),
+                  child: Icon(Icons.lock_person_outlined, size: 30, color: theme.primaryColor),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'مرحباً بك زائرنا الكريم!',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'سجّل الدخول لتصفح شهاداتك المعتمدة وتتبع تقدمك الدراسي',
+                        style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      final loggedIn = await Navigator.of(context).push<bool>(
+                        MaterialPageRoute(builder: (_) => const LoginScreen()),
+                      );
+                      if (loggedIn == true) _fetchProfileData();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 0,
+                    ),
+                    child: const Text('تسجيل الدخول', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () async {
+                      final registered = await Navigator.of(context).push<bool>(
+                        MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                      );
+                      if (registered == true) _fetchProfileData();
+                    },
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: theme.primaryColor,
+                      side: BorderSide(color: theme.primaryColor),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: const Text('إنشاء حساب', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
+    final profile = auth.user != null
+        ? {
+            'name': auth.user!.name,
+            'email': auth.user!.email,
+            'role': auth.user!.role,
+          }
+        : (_data?['profile'] ?? {});
 
     return Container(
       padding: const EdgeInsets.all(20),

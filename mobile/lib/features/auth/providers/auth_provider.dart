@@ -93,6 +93,38 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  Future<bool> register({
+    required String name,
+    required String email,
+    required String password,
+    required String passwordConfirmation,
+    String? phone,
+  }) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final response = await ApiClient().dio.post('/auth/register', data: {
+        'name': name,
+        'email': email,
+        'password': password,
+        'password_confirmation': passwordConfirmation,
+        if (phone != null && phone.isNotEmpty) 'phone': phone,
+      });
+
+      final token = response.data['token'];
+      final userData = response.data['user'];
+      await ApiClient().setToken(token);
+
+      state = AuthState(user: UserModel.fromJson(userData), isLoading: false);
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'تعذر إنشاء الحساب، يرجى التأكد من صحة البريد وكلمة المرور.',
+      );
+      return false;
+    }
+  }
+
   Future<void> logout() async {
     try {
       await ApiClient().dio.post('/auth/logout');
