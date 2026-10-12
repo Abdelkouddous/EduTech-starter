@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'satim' => [
+        'terminal_id' => env('SATIM_TERMINAL_ID', 'EDUTECH_SATIM_01'),
+        'secret_key' => env('SATIM_SECRET_KEY', 'satim_secret_test_key_edutech_2026'),
+        'gateway_url' => env('SATIM_GATEWAY_URL', 'https://satim.dz/epayment/process'),
+    ],
+
 ];

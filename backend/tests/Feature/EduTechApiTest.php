@@ -170,4 +170,79 @@ class EduTechApiTest extends TestCase
                 'my_courses',
             ]);
     }
+
+    public function test_french_academic_certificate_can_be_downloaded_and_verified(): void
+    {
+        $code = 'CERT-2025-0001';
+
+        // 1. Verify certificate publicly
+        $verifyRes = $this->getJson("/api/v1/certificates/{$code}");
+        $verifyRes->assertStatus(200)
+            ->assertJsonPath('status', 'success')
+            ->assertJsonPath('certificate.code', $code)
+            ->assertJsonPath('certificate.trainee_name', 'محمود حسن');
+
+        // 2. Download French PDF stream
+        $downloadRes = $this->get("/api/v1/certificates/{$code}/download");
+        $downloadRes->assertStatus(200);
+        $this->assertEquals('application/pdf', $downloadRes->headers->get('content-type'));
+    }
+
+    public function test_satim_automated_checkout_and_webhook_auto_enrollment_flow(): void
+    {
+        $newTrainee = User::factory()->create(['email' => 'algerian.trainee@dz.com']);
+        $course = Course::where('id', '!=', 1)->first() ?? Course::factory()->create(['price' => 12000]);
+
+        // 1. Initiate SATIM Checkout Session
+        $checkoutRes = $this->actingAs($newTrainee, 'sanctum')
+            ->postJson('/api/v1/payments/satim/checkout', [
+                'course_id' => $course->id,
+            ]);
+
+        $checkoutRes->assertStatus(201)
+            ->assertJsonPath('status', 'success')
+            ->assertJsonStructure([
+                'status',
+                'message',
+                'data' => ['order_id', 'session_id', 'amount', 'currency', 'terminal_id', 'checkout_url', 'signature'],
+            ]);
+
+        $orderId = $checkoutRes->json('data.order_id');
+        $amount = $checkoutRes->json('data.amount');
+
+        $this->assertDatabaseHas('payment_receipts', [
+            'transaction_ref' => $orderId,
+            'method' => 'satim',
+            'status' => 'pending',
+            'trainee_id' => $newTrainee->id,
+        ]);
+
+        // 2. Compute HMAC signature for webhook
+        $secretKey = config('services.satim.secret_key');
+        $validSignature = hash_hmac('sha256', "{$orderId}|{$amount}|APPROVED", $secretKey);
+
+        // 3. SATIM Webhook callback triggers auto-enrollment
+        $webhookRes = $this->postJson('/api/v1/payments/satim/webhook', [
+            'order_id' => $orderId,
+            'amount' => $amount,
+            'status' => 'APPROVED',
+            'response_code' => '00',
+            'signature' => $validSignature,
+        ]);
+
+        $webhookRes->assertStatus(200)
+            ->assertJsonPath('status', 'success');
+
+        // 4. Verify payment receipt was approved and enrollment created
+        $this->assertDatabaseHas('payment_receipts', [
+            'transaction_ref' => $orderId,
+            'status' => 'approved',
+        ]);
+
+        $this->assertDatabaseHas('enrollments', [
+            'trainee_id' => $newTrainee->id,
+            'course_id' => $course->id,
+            'status' => 'approved',
+        ]);
+    }
 }

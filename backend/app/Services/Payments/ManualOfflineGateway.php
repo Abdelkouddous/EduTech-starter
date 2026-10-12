@@ -14,10 +14,13 @@ class ManualOfflineGateway implements PaymentGatewayInterface
     public function title(): string
     {
         return match ($this->method) {
+            'baridimob' => 'BaridiMob (بريدي موب)',
+            'ccp' => 'CCP Algérie Poste (حساب بريدي جاري)',
+            'edahabia' => 'Carte Edahabia / CIB (الذهبية)',
             'instapay' => 'InstaPay (إنستاباي)',
             'vodafone_cash' => 'Vodafone Cash (فودافون كاش)',
             'fawry' => 'Fawry (فوري)',
-            default => 'Manual Offline Transfer',
+            default => 'Paiement Manuel / التحويل اليدوي',
         };
     }
 

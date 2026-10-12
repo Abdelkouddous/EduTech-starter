@@ -21,7 +21,7 @@ class PaymentReceiptController extends Controller
             'course_id' => 'required|exists:courses,id',
             'cohort_id' => 'nullable|exists:cohorts,id',
             'amount' => 'required|numeric|min:1',
-            'method' => 'required|string|in:instapay,vodafone_cash,fawry,card',
+            'method' => 'required|string|in:baridimob,ccp,edahabia,satim,cib,instapay,vodafone_cash,fawry,card',
             'sender_account_or_number' => 'required|string|max:100',
             'transaction_ref' => 'nullable|string|max:100',
             'receipt_image' => 'required|image|max:10240', // 10MB max

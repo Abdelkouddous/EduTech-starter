@@ -19,6 +19,7 @@ class PaymentReceipt extends Model
         'method',
         'sender_account_or_number',
         'transaction_ref',
+        'gateway_session_id',
         'receipt_image_path',
         'status',
         'rejection_reason',

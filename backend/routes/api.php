@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\LessonController;
 use App\Http\Controllers\Api\LessonNoteController;
 use App\Http\Controllers\Api\PaymentReceiptController;
 use App\Http\Controllers\Api\ProfileHubController;
+use App\Http\Controllers\Api\SatimPaymentController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -29,6 +30,10 @@ Route::prefix('v1')->group(function () {
     // 5. Public Certificate Verification & Download (EDU-05)
     Route::get('/certificates/{code}', [EnrollmentController::class, 'verifyCertificate']);
     Route::get('/certificates/{code}/download', [EnrollmentController::class, 'downloadCertificate']);
+
+    // 6. Automated SATIM / CIB E-Payment Webhooks & Simulator (EDU-10)
+    Route::post('/payments/satim/webhook', [SatimPaymentController::class, 'handleWebhook']);
+    Route::get('/payments/satim/checkout/{orderId}', [SatimPaymentController::class, 'simulator']);
 
     // ==========================================
     // Protected Routes (Sanctum Authenticated)
@@ -54,9 +59,10 @@ Route::prefix('v1')->group(function () {
         Route::get('/cohorts/{cohortId}/announcements', [CohortAnnouncementController::class, 'index']);
         Route::post('/cohorts/{cohortId}/announcements', [CohortAnnouncementController::class, 'store']);
 
-        // Manual Payment Receipts Submission (EDU-03)
+        // Payment Gateways (EDU-03 Manual & EDU-10 SATIM Automated)
         Route::post('/payments/submit-receipt', [PaymentReceiptController::class, 'submit']);
         Route::get('/payments/my-receipts', [PaymentReceiptController::class, 'myReceipts']);
+        Route::post('/payments/satim/checkout', [SatimPaymentController::class, 'initiateCheckout']);
 
         // ==========================================
         // Staff / Admin Endpoints

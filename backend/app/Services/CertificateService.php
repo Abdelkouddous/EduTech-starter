@@ -45,14 +45,14 @@ class CertificateService
     public function generatePdf(Certificate $certificate)
     {
         $settings = InstituteSetting::allCached();
-        $instituteName = $settings['institute_name'] ?? 'أكاديمية التعلم';
+        $instituteName = $settings['institute_name'] ?? 'EduTech Starter';
 
         $data = [
             'certificate' => $certificate,
             'instituteName' => $instituteName,
             'traineeName' => $certificate->trainee_name,
             'courseTitle' => $certificate->course_title,
-            'issuedDate' => $certificate->issued_date->format('Y/m/d'),
+            'issuedDate' => $certificate->issued_date->format('d/m/Y'),
             'code' => $certificate->certificate_code,
             'verifyUrl' => url('/api/v1/certificates/' . $certificate->certificate_code),
         ];
