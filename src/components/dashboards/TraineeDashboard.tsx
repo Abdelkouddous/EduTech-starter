@@ -17,8 +17,11 @@ import {
   ChevronLeft,
   X,
   QrCode,
-  ShieldCheck
+  ShieldCheck,
+  UserCheck,
 } from 'lucide-react';
+import { LessonNotesWorkspace } from '../study/LessonNotesWorkspace';
+import { AcademicProfileHub } from '../profile/AcademicProfileHub';
 
 interface TraineeDashboardProps {
   onExploreMoreCourses: () => void;
@@ -40,6 +43,7 @@ export const TraineeDashboard: React.FC<TraineeDashboardProps> = ({ onExploreMor
   );
 
   const [showCertificateModal, setShowCertificateModal] = useState(false);
+  const [currentView, setCurrentView] = useState<'study' | 'profile'>('study');
 
   const activeCourse = courses.find(c => c.id === activeCourseId);
   const activeEnrollment = myEnrollments.find(e => e.courseId === activeCourseId);
@@ -69,14 +73,40 @@ export const TraineeDashboard: React.FC<TraineeDashboardProps> = ({ onExploreMor
             </div>
           </div>
 
-          <button
-            onClick={onExploreMoreCourses}
-            className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition-all shadow-xs cursor-pointer flex items-center gap-1.5"
-          >
-            <BookOpen className="w-4 h-4" />
-            <span>استعراض والتسجيل في دورات جديدة</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <div className="flex bg-slate-100 p-1 rounded-xl">
+              <button
+                onClick={() => setCurrentView('study')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  currentView === 'study' ? 'bg-white text-indigo-700 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                مسار الدراسة والدروس
+              </button>
+              <button
+                onClick={() => setCurrentView('profile')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  currentView === 'profile' ? 'bg-white text-indigo-700 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                الملف الأكاديمي والشهادات
+              </button>
+            </div>
+
+            <button
+              onClick={onExploreMoreCourses}
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition-all shadow-xs cursor-pointer flex items-center gap-1.5"
+            >
+              <BookOpen className="w-4 h-4" />
+              <span>دليل الدورات</span>
+            </button>
+          </div>
         </div>
+
+        {currentView === 'profile' ? (
+          <AcademicProfileHub onBackToCourses={() => setCurrentView('study')} />
+        ) : (
+          <>
 
         {/* Enrollments Status Bar */}
         <div className="space-y-4">
@@ -230,6 +260,12 @@ export const TraineeDashboard: React.FC<TraineeDashboardProps> = ({ onExploreMor
                       </div>
                     </div>
                   )}
+
+                  {/* Interactive Study Notes (EDU-07) */}
+                  <LessonNotesWorkspace
+                    lessonId={activeCourse.id}
+                    lessonTitle={activeCourse.title}
+                  />
                 </div>
 
                 {/* Lessons Playlist Sidebar */}
@@ -282,6 +318,9 @@ export const TraineeDashboard: React.FC<TraineeDashboardProps> = ({ onExploreMor
             )}
 
           </div>
+        )}
+
+        </>
         )}
 
       </div>

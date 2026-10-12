@@ -127,4 +127,47 @@ class EduTechApiTest extends TestCase
             'status' => 'approved',
         ]);
     }
+
+    public function test_trainee_can_create_and_fetch_timestamped_lesson_notes(): void
+    {
+        $trainee = User::where('email', 'mahmoud@gmail.com')->first();
+        $lesson = Lesson::first();
+
+        // 1. Create a note at 145 seconds
+        $storeRes = $this->actingAs($trainee, 'sanctum')
+            ->postJson("/api/v1/lessons/{$lesson->id}/notes", [
+                'content' => 'ملاحظة مهمة: شرح آلية التدقيق المالي ومصادقة الطلبات',
+                'timestamp_seconds' => 145,
+            ]);
+
+        $storeRes->assertStatus(201)
+            ->assertJsonPath('status', 'success')
+            ->assertJsonPath('note.timestamp_seconds', 145);
+
+        // 2. Fetch lesson notes
+        $indexRes = $this->actingAs($trainee, 'sanctum')
+            ->getJson("/api/v1/lessons/{$lesson->id}/notes");
+
+        $indexRes->assertStatus(200)
+            ->assertJsonPath('status', 'success')
+            ->assertJsonCount(1, 'notes');
+    }
+
+    public function test_trainee_can_access_academic_profile_hub_with_aggregated_stats(): void
+    {
+        $trainee = User::where('email', 'mahmoud@gmail.com')->first();
+
+        $response = $this->actingAs($trainee, 'sanctum')
+            ->getJson('/api/v1/user/profile-hub');
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'status',
+                'profile' => ['id', 'name', 'email', 'role', 'joined_at'],
+                'stats' => ['enrolled_courses', 'completed_courses', 'completed_lessons', 'study_notes_count', 'certificates_count'],
+                'certificates',
+                'recent_receipts',
+                'my_courses',
+            ]);
+    }
 }

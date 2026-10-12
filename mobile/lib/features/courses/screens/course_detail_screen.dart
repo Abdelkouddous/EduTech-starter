@@ -6,6 +6,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../../payments/screens/payment_receipt_screen.dart';
 import '../providers/courses_provider.dart';
 import '../../../core/network/api_client.dart';
+import '../../notes/screens/lesson_notes_sheet.dart';
 
 class CourseDetailScreen extends ConsumerWidget {
   final String slug;
@@ -185,9 +186,13 @@ class CourseDetailScreen extends ConsumerWidget {
                                 ),
                                 title: Text(lesson.title),
                                 subtitle: Text(lesson.duration),
-                                trailing: lesson.isFreePreview
-                                    ? Container(
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (lesson.isFreePreview)
+                                      Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                        margin: const EdgeInsets.only(left: 6),
                                         decoration: BoxDecoration(
                                           color: Colors.green[50],
                                           borderRadius: BorderRadius.circular(4),
@@ -196,8 +201,14 @@ class CourseDetailScreen extends ConsumerWidget {
                                           'معاينة مجانية',
                                           style: TextStyle(color: Colors.green, fontSize: 10),
                                         ),
-                                      )
-                                    : null,
+                                      ),
+                                    IconButton(
+                                      icon: const Icon(Icons.note_alt_outlined, size: 18, color: Colors.indigo),
+                                      tooltip: 'مفكرة الدرس',
+                                      onPressed: () => LessonNotesSheet.show(context, lesson.id, lesson.title),
+                                    ),
+                                  ],
+                                ),
                                 onTap: () => _playLesson(context, lesson.id, lesson.title),
                               )),
                             ],

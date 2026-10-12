@@ -19,3 +19,8 @@ ios/Podfile.lock
 
 # Environment secrets
 .env
+
+# IDE and Metadata
+.idea/
+*.iml
+.metadata

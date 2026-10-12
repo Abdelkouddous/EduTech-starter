@@ -6,7 +6,9 @@ use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\Api\EnrollmentController;
 use App\Http\Controllers\Api\InstituteBootstrapController;
 use App\Http\Controllers\Api\LessonController;
+use App\Http\Controllers\Api\LessonNoteController;
 use App\Http\Controllers\Api\PaymentReceiptController;
+use App\Http\Controllers\Api\ProfileHubController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -39,6 +41,14 @@ Route::prefix('v1')->group(function () {
         // Trainee Enrolled Dashboard & Progress Tracking (EDU-05)
         Route::get('/my-courses', [EnrollmentController::class, 'myCourses']);
         Route::post('/lessons/{id}/complete', [EnrollmentController::class, 'toggleLessonComplete']);
+
+        // Academic Profile & Credential Hub (EDU-08)
+        Route::get('/user/profile-hub', [ProfileHubController::class, 'show']);
+
+        // Interactive Study Notes & Lesson Workspace (EDU-07)
+        Route::get('/lessons/{lessonId}/notes', [LessonNoteController::class, 'index']);
+        Route::post('/lessons/{lessonId}/notes', [LessonNoteController::class, 'store']);
+        Route::delete('/notes/{id}', [LessonNoteController::class, 'destroy']);
 
         // Cohort Announcements & Live Meeting Links (EDU-01 senior feature)
         Route::get('/cohorts/{cohortId}/announcements', [CohortAnnouncementController::class, 'index']);

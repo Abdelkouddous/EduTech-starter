@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,7 +26,8 @@ class _PaymentReceiptScreenState extends ConsumerState<PaymentReceiptScreen> {
   String selectedMethod = 'instapay';
   final TextEditingController accountController = TextEditingController();
   final TextEditingController refController = TextEditingController();
-  File? receiptImage;
+  XFile? receiptFile;
+  Uint8List? receiptBytes;
   bool isSubmitting = false;
 
   final ImagePicker _picker = ImagePicker();
@@ -34,8 +35,10 @@ class _PaymentReceiptScreenState extends ConsumerState<PaymentReceiptScreen> {
   Future<void> _pickImage() async {
     final XFile? picked = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
     if (picked != null) {
+      final bytes = await picked.readAsBytes();
       setState(() {
-        receiptImage = File(picked.path);
+        receiptFile = picked;
+        receiptBytes = bytes;
       });
     }
   }
@@ -48,7 +51,7 @@ class _PaymentReceiptScreenState extends ConsumerState<PaymentReceiptScreen> {
       return;
     }
 
-    if (receiptImage == null) {
+    if (receiptBytes == null || receiptFile == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('يرجى اختيار صورة إشعار أو إيصال التحويل')),
       );
@@ -58,15 +61,15 @@ class _PaymentReceiptScreenState extends ConsumerState<PaymentReceiptScreen> {
     setState(() => isSubmitting = true);
 
     try {
-      final fileName = receiptImage!.path.split('/').last;
+      final fileName = receiptFile!.name;
       final formData = FormData.fromMap({
         'course_id': widget.courseId,
         'amount': widget.amount,
         'method': selectedMethod,
         'sender_account_or_number': accountController.text.trim(),
         'transaction_ref': refController.text.trim(),
-        'receipt_image': await MultipartFile.fromFile(
-          receiptImage!.path,
+        'receipt_image': MultipartFile.fromBytes(
+          receiptBytes!,
           filename: fileName,
         ),
       });
@@ -196,10 +199,10 @@ class _PaymentReceiptScreenState extends ConsumerState<PaymentReceiptScreen> {
                     border: Border.all(color: Colors.grey.shade400, style: BorderStyle.solid),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: receiptImage != null
+                  child: receiptBytes != null
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(12),
-                          child: Image.file(receiptImage!, fit: BoxFit.cover),
+                          child: Image.memory(receiptBytes!, fit: BoxFit.cover),
                         )
                       : const Column(
                           mainAxisAlignment: MainAxisAlignment.center,

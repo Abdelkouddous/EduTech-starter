@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/theme_provider.dart';
 import 'features/courses/screens/home_screen.dart';
 import 'features/enrollments/screens/my_courses_screen.dart';
+import 'features/profile/screens/profile_hub_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,6 +50,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   final List<Widget> _screens = const [
     HomeScreen(),
     MyCoursesScreen(),
+    ProfileHubScreen(),
   ];
 
   @override
@@ -70,6 +72,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               icon: Icon(Icons.menu_book_outlined),
               selectedIcon: Icon(Icons.menu_book),
               label: 'دوراتي',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.person_outline),
+              selectedIcon: Icon(Icons.person),
+              label: 'الملف والشهادات',
             ),
           ],
         ),
