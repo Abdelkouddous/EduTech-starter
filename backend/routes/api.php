@@ -2,9 +2,12 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CohortAnnouncementController;
+use App\Http\Controllers\Api\ConsultationController;
+use App\Http\Controllers\Api\CouponController;
 use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\Api\EnrollmentController;
 use App\Http\Controllers\Api\InstituteBootstrapController;
+use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\LessonController;
 use App\Http\Controllers\Api\LessonNoteController;
 use App\Http\Controllers\Api\PaymentReceiptController;
@@ -20,14 +23,15 @@ Route::prefix('v1')->group(function () {
     Route::post('/auth/register', [AuthController::class, 'register']);
     Route::post('/auth/login', [AuthController::class, 'login']);
 
-    // 3. Courses Catalog & Public Details (EDU-01)
+    // 3. Courses Catalog & Reviews (EDU-01, EDU-11)
     Route::get('/courses', [CourseController::class, 'index']);
     Route::get('/courses/{slug}', [CourseController::class, 'show']);
+    Route::get('/courses/{id}/reviews', [CourseController::class, 'reviews']);
 
     // 4. Secure Video Player & Lesson Delivery (EDU-04)
     Route::get('/lessons/{id}/play', [LessonController::class, 'play']);
 
-    // 5. Public Certificate Verification & Download (EDU-05)
+    // 5. Public Certificate Verification & Download (EDU-05, EDU-09)
     Route::get('/certificates/{code}', [EnrollmentController::class, 'verifyCertificate']);
     Route::get('/certificates/{code}/download', [EnrollmentController::class, 'downloadCertificate']);
 
@@ -35,13 +39,24 @@ Route::prefix('v1')->group(function () {
     Route::post('/payments/satim/webhook', [SatimPaymentController::class, 'handleWebhook']);
     Route::get('/payments/satim/checkout/{orderId}', [SatimPaymentController::class, 'simulator']);
 
+    // 7. Consultations Catalog & Available Slots (EDU-12)
+    Route::get('/consultations/types', [ConsultationController::class, 'types']);
+    Route::get('/consultations/types/{id}/slots', [ConsultationController::class, 'slots']);
+
+    // 8. Promotional Discount Coupons Validation (EDU-15)
+    Route::post('/coupons/validate', [CouponController::class, 'validateCoupon']);
+
     // ==========================================
     // Protected Routes (Sanctum Authenticated)
     // ==========================================
     Route::middleware('auth:sanctum')->group(function () {
-        // Current user profile
+        // Current user profile & Account Deletion (A6)
         Route::get('/auth/me', [AuthController::class, 'me']);
         Route::post('/auth/logout', [AuthController::class, 'logout']);
+        Route::delete('/auth/account', [AuthController::class, 'deleteAccount']);
+
+        // Course Reviews Submission (EDU-11)
+        Route::post('/courses/{id}/reviews', [CourseController::class, 'addReview']);
 
         // Trainee Enrolled Dashboard & Progress Tracking (EDU-05)
         Route::get('/my-courses', [EnrollmentController::class, 'myCourses']);
@@ -55,7 +70,16 @@ Route::prefix('v1')->group(function () {
         Route::post('/lessons/{lessonId}/notes', [LessonNoteController::class, 'store']);
         Route::delete('/notes/{id}', [LessonNoteController::class, 'destroy']);
 
-        // Cohort Announcements & Live Meeting Links (EDU-01 senior feature)
+        // Consultations 1-on-1 Booking & Management (EDU-12)
+        Route::post('/consultations/book', [ConsultationController::class, 'book']);
+        Route::get('/consultations/my-bookings', [ConsultationController::class, 'myBookings']);
+        Route::post('/consultations/bookings/{id}/cancel', [ConsultationController::class, 'cancel']);
+
+        // Electronic PDF Invoices & Billing History (EDU-13)
+        Route::get('/invoices', [InvoiceController::class, 'index']);
+        Route::get('/invoices/{id}/download', [InvoiceController::class, 'download']);
+
+        // Cohort Announcements & Live Meeting Links (EDU-01)
         Route::get('/cohorts/{cohortId}/announcements', [CohortAnnouncementController::class, 'index']);
         Route::post('/cohorts/{cohortId}/announcements', [CohortAnnouncementController::class, 'store']);
 

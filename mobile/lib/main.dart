@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/localization/language_provider.dart';
 import 'core/theme/theme_provider.dart';
+import 'features/consultations/screens/consultations_screen.dart';
 import 'features/courses/screens/home_screen.dart';
 import 'features/enrollments/screens/my_courses_screen.dart';
 import 'features/profile/screens/profile_hub_screen.dart';
@@ -52,6 +53,7 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
 
   final List<Widget> _screens = const [
     HomeScreen(),
+    ConsultationsScreen(),
     MyCoursesScreen(),
     ProfileHubScreen(),
   ];
@@ -73,6 +75,11 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
               icon: const Icon(Icons.school_outlined),
               selectedIcon: const Icon(Icons.school),
               label: langNotifier.t('home'),
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.calendar_month_outlined),
+              selectedIcon: const Icon(Icons.calendar_month),
+              label: langNotifier.t('consultations'),
             ),
             NavigationDestination(
               icon: const Icon(Icons.menu_book_outlined),

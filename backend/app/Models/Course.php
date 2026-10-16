@@ -66,4 +66,19 @@ class Course extends Model
     {
         return $this->morphMany(FileAttachment::class, 'attachable');
     }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function recalculateRating(): void
+    {
+        $avg = $this->reviews()->where('is_approved', true)->avg('rating') ?? 0;
+        $count = $this->reviews()->where('is_approved', true)->count();
+        $this->update([
+            'rating' => round($avg, 2),
+            'reviews_count' => $count,
+        ]);
+    }
 }

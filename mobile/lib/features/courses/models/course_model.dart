@@ -47,6 +47,29 @@ class CourseModuleModel {
   }
 }
 
+class InstructorModel {
+  final int id;
+  final String name;
+  final String avatar;
+  final String specialization;
+
+  InstructorModel({
+    required this.id,
+    required this.name,
+    required this.avatar,
+    required this.specialization,
+  });
+
+  factory InstructorModel.fromJson(Map<String, dynamic> json) {
+    return InstructorModel(
+      id: json['id'] ?? 0,
+      name: json['name'] ?? 'مدرب معتمد',
+      avatar: json['avatar'] ?? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+      specialization: json['specialization'] ?? json['title'] ?? 'خبير أكاديمي معتمد',
+    );
+  }
+}
+
 class CourseModel {
   final int id;
   final String title;
@@ -60,6 +83,9 @@ class CourseModel {
   final int durationHours;
   final String? coverImage;
   final String? instructorName;
+  final double rating;
+  final int reviewsCount;
+  final InstructorModel instructor;
   final List<CourseModuleModel> modules;
 
   CourseModel({
@@ -75,12 +101,24 @@ class CourseModel {
     required this.durationHours,
     this.coverImage,
     this.instructorName,
+    this.rating = 5.0,
+    this.reviewsCount = 0,
+    required this.instructor,
     this.modules = const [],
   });
 
   factory CourseModel.fromJson(Map<String, dynamic> json) {
     var rawModules = json['modules'] as List? ?? [];
-    var instructor = json['instructor'] as Map<String, dynamic>?;
+    var instructorJson = json['instructor'] as Map<String, dynamic>?;
+
+    final instructorObj = instructorJson != null
+        ? InstructorModel.fromJson(instructorJson)
+        : InstructorModel(
+            id: 0,
+            name: json['instructor_name'] ?? 'مدرب معتمد',
+            avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+            specialization: 'خبير تدريب وتطوير برمجيات',
+          );
 
     return CourseModel(
       id: json['id'],
@@ -94,7 +132,10 @@ class CourseModel {
       originalPrice: json['original_price'] != null ? double.tryParse(json['original_price'].toString()) : null,
       durationHours: json['duration_hours'] ?? 0,
       coverImage: json['cover_image'],
-      instructorName: instructor?['name'] ?? 'مدرب معتمد',
+      instructorName: instructorObj.name,
+      rating: double.tryParse(json['rating']?.toString() ?? '5.0') ?? 5.0,
+      reviewsCount: json['reviews_count'] ?? (json['reviews'] as List?)?.length ?? 0,
+      instructor: instructorObj,
       modules: rawModules.map((m) => CourseModuleModel.fromJson(m)).toList(),
     );
   }

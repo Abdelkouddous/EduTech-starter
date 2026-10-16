@@ -2,10 +2,16 @@
 
 namespace Tests\Feature;
 
+use App\Models\AvailabilitySlot;
+use App\Models\ConsultationBooking;
+use App\Models\ConsultationType;
+use App\Models\Coupon;
 use App\Models\Course;
 use App\Models\Enrollment;
+use App\Models\Invoice;
 use App\Models\Lesson;
 use App\Models\PaymentReceipt;
+use App\Models\Review;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -243,6 +249,143 @@ class EduTechApiTest extends TestCase
             'trainee_id' => $newTrainee->id,
             'course_id' => $course->id,
             'status' => 'approved',
+        ]);
+    }
+
+    public function test_course_catalog_search_and_filtering(): void
+    {
+        // 1. Search by keyword
+        $res = $this->getJson('/api/v1/courses?q=React');
+        $res->assertStatus(200)
+            ->assertJsonPath('status', 'success');
+
+        // 2. Filter by price range
+        $resPrice = $this->getJson('/api/v1/courses?price_min=1000&price_max=10000');
+        $resPrice->assertStatus(200)
+            ->assertJsonPath('status', 'success');
+
+        // 3. Filter by rating
+        $resRating = $this->getJson('/api/v1/courses?rating=4.5');
+        $resRating->assertStatus(200)
+            ->assertJsonPath('status', 'success');
+    }
+
+    public function test_course_reviews_listing_and_submission_by_enrolled_trainee(): void
+    {
+        $trainee = User::where('email', 'mahmoud@gmail.com')->first();
+        $course = Course::first();
+
+        // 1. Fetch public reviews for course
+        $reviewsRes = $this->getJson("/api/v1/courses/{$course->id}/reviews");
+        $reviewsRes->assertStatus(200)
+            ->assertJsonPath('status', 'success')
+            ->assertJsonStructure(['status', 'average_rating', 'reviews_count', 'data']);
+
+        // 2. Enrolled trainee submits a review
+        $submitRes = $this->actingAs($trainee, 'sanctum')
+            ->postJson("/api/v1/courses/{$course->id}/reviews", [
+                'rating' => 5,
+                'comment' => 'محتوى ممتاز وتطبيق عملي عالي الجودة.',
+            ]);
+
+        $submitRes->assertStatus(201)
+            ->assertJsonPath('status', 'success')
+            ->assertJsonPath('data.rating', 5);
+
+        $this->assertDatabaseHas('reviews', [
+            'user_id' => $trainee->id,
+            'course_id' => $course->id,
+            'rating' => 5,
+        ]);
+    }
+
+    public function test_consultations_listing_and_booking_workflow(): void
+    {
+        $trainee = User::where('email', 'mahmoud@gmail.com')->first();
+        $type = ConsultationType::first();
+
+        // 1. List consultation types
+        $typesRes = $this->getJson('/api/v1/consultations/types');
+        $typesRes->assertStatus(200)
+            ->assertJsonPath('status', 'success');
+
+        // 2. List available slots for type
+        $slotsRes = $this->getJson("/api/v1/consultations/types/{$type->id}/slots");
+        $slotsRes->assertStatus(200)
+            ->assertJsonPath('status', 'success');
+
+        $slot = AvailabilitySlot::where('consultation_type_id', $type->id)->where('is_booked', false)->first();
+
+        // 3. Trainee books a consultation
+        $bookRes = $this->actingAs($trainee, 'sanctum')
+            ->postJson('/api/v1/consultations/book', [
+                'slot_id' => $slot->id,
+                'notes' => 'أرغب بمناقشة مسار التوظيف والعمل عن بعد.',
+            ]);
+
+        $bookRes->assertStatus(201)
+            ->assertJsonPath('status', 'success')
+            ->assertJsonStructure(['status', 'message', 'data' => ['booking_code', 'meeting_url']]);
+
+        // Slot should now be marked as booked
+        $slot->refresh();
+        $this->assertTrue($slot->is_booked);
+
+        // 4. View trainee bookings
+        $myBookingsRes = $this->actingAs($trainee, 'sanctum')
+            ->getJson('/api/v1/consultations/my-bookings');
+
+        $myBookingsRes->assertStatus(200)
+            ->assertJsonPath('status', 'success');
+    }
+
+    public function test_electronic_invoices_listing_and_download(): void
+    {
+        $trainee = User::where('email', 'mahmoud@gmail.com')->first();
+        $invoice = Invoice::where('trainee_id', $trainee->id)->first();
+
+        // 1. List user invoices
+        $listRes = $this->actingAs($trainee, 'sanctum')
+            ->getJson('/api/v1/invoices');
+
+        $listRes->assertStatus(200)
+            ->assertJsonPath('status', 'success')
+            ->assertJsonStructure(['status', 'data']);
+
+        // 2. Download invoice PDF
+        $downloadRes = $this->actingAs($trainee, 'sanctum')
+            ->get("/api/v1/invoices/{$invoice->id}/download");
+
+        $downloadRes->assertStatus(200);
+        $this->assertEquals('application/pdf', $downloadRes->headers->get('content-type'));
+    }
+
+    public function test_coupon_validation_and_discount_calculation(): void
+    {
+        $response = $this->postJson('/api/v1/coupons/validate', [
+            'code' => 'EDUTECH20',
+            'amount' => 10000,
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('status', 'success')
+            ->assertJsonPath('data.code', 'EDUTECH20')
+            ->assertJsonPath('data.discount_amount', 2000)
+            ->assertJsonPath('data.final_amount', 8000);
+    }
+
+    public function test_in_app_account_deletion_compliance(): void
+    {
+        $user = User::factory()->create(['email' => 'to.delete@dz.com']);
+
+        $res = $this->actingAs($user, 'sanctum')
+            ->deleteJson('/api/v1/auth/account');
+
+        $res->assertStatus(200)
+            ->assertJsonPath('status', 'success');
+
+        $this->assertDatabaseMissing('users', [
+            'id' => $user->id,
         ]);
     }
 }

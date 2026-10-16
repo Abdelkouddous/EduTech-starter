@@ -3,16 +3,22 @@
 namespace Database\Seeders;
 
 use App\Models\AcademicTerm;
+use App\Models\AvailabilitySlot;
 use App\Models\Certificate;
 use App\Models\Cohort;
 use App\Models\CohortAnnouncement;
+use App\Models\ConsultationBooking;
+use App\Models\ConsultationType;
+use App\Models\Coupon;
 use App\Models\Course;
 use App\Models\CourseModule;
 use App\Models\Enrollment;
 use App\Models\InstituteSetting;
+use App\Models\Invoice;
 use App\Models\Lesson;
 use App\Models\LessonProgress;
 use App\Models\PaymentReceipt;
+use App\Models\Review;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -338,6 +344,108 @@ class DatabaseSeeder extends Seeder
                 'course_title' => $course1->title,
                 'issued_date' => now()->toDateString(),
                 'pdf_path' => 'certificates/CERT-2025-0001.pdf',
+            ]
+        );
+
+        // 8. Reviews (EDU-11, C4)
+        Review::firstOrCreate(
+            ['user_id' => $trainee1->id, 'course_id' => $course1->id],
+            [
+                'rating' => 5,
+                'comment' => 'دورة استثنائية وشرح عملي ومبسط جداً، استفدت كثيراً من التطبيقات العملية وشهادة معتمدة ممتازة.',
+                'is_approved' => true,
+            ]
+        );
+        $course1->recalculateRating();
+
+        // 9. Consultations & 1-on-1 Availability Slots (EDU-12, K1, K2)
+        $consultationType1 = ConsultationType::firstOrCreate(
+            ['slug' => 'career-guidance-fullstack'],
+            [
+                'specialist_id' => $inst1->id,
+                'title' => 'جلسة استشارية وتوجيه مهني: مطور الويب المتكامل',
+                'description' => 'جلسة خاصة 1-on-1 لمراجعة مسارك المهني، سيرتك الذاتية، وتحليل مشاريعك البرمجية لتأهيلك لسوق العمل والعمل الحر.',
+                'duration_minutes' => 45,
+                'price' => 4500.00,
+                'is_active' => true,
+            ]
+        );
+
+        $consultationType2 = ConsultationType::firstOrCreate(
+            ['slug' => 'ai-ml-architecture-consultation'],
+            [
+                'specialist_id' => $inst2->id,
+                'title' => 'استشارة تقنية متقدمة: هندسة وتدريب نماذج الذكاء الاصطناعي',
+                'description' => 'جلسة استشارية متخصصة لحل مشاكل البيانات، اختيار خوارزميات الـ Machine Learning و Deep Learning ونشرها على السحابة.',
+                'duration_minutes' => 60,
+                'price' => 7000.00,
+                'is_active' => true,
+            ]
+        );
+
+        // Add availability slots for the upcoming days
+        $slot1 = AvailabilitySlot::firstOrCreate(
+            [
+                'consultation_type_id' => $consultationType1->id,
+                'start_time' => now()->addDays(2)->setHour(14)->setMinute(0)->setSecond(0),
+            ],
+            [
+                'specialist_id' => $inst1->id,
+                'end_time' => now()->addDays(2)->setHour(14)->setMinute(45)->setSecond(0),
+                'is_booked' => false,
+            ]
+        );
+
+        $slot2 = AvailabilitySlot::firstOrCreate(
+            [
+                'consultation_type_id' => $consultationType1->id,
+                'start_time' => now()->addDays(3)->setHour(16)->setMinute(0)->setSecond(0),
+            ],
+            [
+                'specialist_id' => $inst1->id,
+                'end_time' => now()->addDays(3)->setHour(16)->setMinute(45)->setSecond(0),
+                'is_booked' => false,
+            ]
+        );
+
+        // 10. Electronic Invoices Demo (EDU-13, P7)
+        Invoice::firstOrCreate(
+            ['invoice_number' => 'INV-2026-0001'],
+            [
+                'trainee_id' => $trainee1->id,
+                'payment_receipt_id' => $receipt1->id,
+                'item_type' => 'course',
+                'item_id' => $course1->id,
+                'item_title' => $course1->title,
+                'amount' => $receipt1->amount,
+                'currency' => 'DZD',
+                'payment_method' => 'instapay',
+                'issued_at' => now()->subDays(5),
+            ]
+        );
+
+        // 11. Promotional Discount Coupons (EDU-15, D7)
+        Coupon::firstOrCreate(
+            ['code' => 'EDUTECH20'],
+            [
+                'discount_type' => 'percentage',
+                'discount_value' => 20.00,
+                'max_uses' => 100,
+                'used_count' => 12,
+                'expires_at' => now()->addMonths(6),
+                'is_active' => true,
+            ]
+        );
+
+        Coupon::firstOrCreate(
+            ['code' => 'DZPROMO1000'],
+            [
+                'discount_type' => 'fixed',
+                'discount_value' => 1000.00,
+                'max_uses' => 50,
+                'used_count' => 4,
+                'expires_at' => now()->addMonths(3),
+                'is_active' => true,
             ]
         );
     }

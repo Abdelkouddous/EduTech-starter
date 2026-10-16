@@ -108,4 +108,21 @@ class AuthController extends Controller
             'message' => 'تم تسجيل الخروج بنجاح',
         ]);
     }
+
+    /**
+     * In-app account deletion for App Store & Google Play compliance (A6)
+     */
+    public function deleteAccount(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        // Revoke all tokens and remove user personal data
+        $user->tokens()->delete();
+        $user->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Votre compte et vos données personnelles ont été supprimés avec succès / تم حذف حسابك وبياناتك الشخصية بنجاح.',
+        ]);
+    }
 }

@@ -124,6 +124,9 @@ class SatimPaymentGateway implements PaymentGatewayInterface
 
                 $receipt->course->increment('students_count');
 
+                // Auto-generate official electronic invoice (P7)
+                app(\App\Services\InvoiceService::class)->createFromReceipt($receipt);
+
                 return [
                     'status' => 'success',
                     'message' => 'Paiement SATIM/CIB approuvé. Accès activé automatiquement.',

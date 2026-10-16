@@ -147,6 +147,9 @@ class PaymentReceiptController extends Controller
 
                 // Increment student count on course
                 $receipt->course->increment('students_count');
+
+                // Auto-generate official electronic PDF invoice (P7)
+                app(\App\Services\InvoiceService::class)->createFromReceipt($receipt);
             }
         });
 

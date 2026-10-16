@@ -6,11 +6,24 @@ import '../../auth/providers/auth_provider.dart';
 import '../providers/courses_provider.dart';
 import 'course_detail_screen.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final themeState = ref.watch(themeProvider);
     final authState = ref.watch(authProvider);
     final coursesAsync = ref.watch(coursesListProvider);
@@ -93,6 +106,44 @@ class HomeScreen extends ConsumerWidget {
                             : langNotifier.t('appTagline'),
                         style: const TextStyle(color: Colors.white70, fontSize: 13),
                       ),
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.08),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: TextField(
+                          controller: _searchController,
+                          decoration: InputDecoration(
+                            icon: const Icon(Icons.search, color: Color(0xFF64748B), size: 20),
+                            hintText: langNotifier.t('searchHint'),
+                            hintStyle: const TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
+                            border: InputBorder.none,
+                            suffixIcon: _searchController.text.isNotEmpty
+                                ? IconButton(
+                                    icon: const Icon(Icons.clear, size: 18, color: Color(0xFF64748B)),
+                                    onPressed: () {
+                                      _searchController.clear();
+                                      ref.read(courseSearchQueryProvider.notifier).state = '';
+                                      setState(() {});
+                                    },
+                                  )
+                                : null,
+                          ),
+                          onChanged: (val) {
+                            ref.read(courseSearchQueryProvider.notifier).state = val;
+                            setState(() {});
+                          },
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -121,12 +172,31 @@ class HomeScreen extends ConsumerWidget {
                 error: (err, _) => SliverFillRemaining(
                   child: Center(child: Text('حدث خطأ في تحميل الدورات: $err')),
                 ),
-                data: (courses) => SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final course = courses[index];
+                data: (courses) {
+                  if (courses.isEmpty) {
+                    return SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.search_off_rounded, size: 54, color: Colors.grey.shade400),
+                            const SizedBox(height: 12),
+                            Text(
+                              langNotifier.t('noCoursesFound'),
+                              style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+                  return SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final course = courses[index];
                         return Card(
                           margin: const EdgeInsets.only(bottom: 16),
                           shape: RoundedRectangleBorder(
@@ -221,12 +291,13 @@ class HomeScreen extends ConsumerWidget {
                       childCount: courses.length,
                     ),
                   ),
-                ),
-              ),
-            ],
-          ),
+                );
+              },
+            ),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

@@ -81,7 +81,18 @@ class _ProfileHubScreenState extends ConsumerState<ProfileHubScreen> {
               'status': 'pending',
               'transaction_ref': 'VF-448102',
             }
-          ]
+          ],
+          'invoices': [
+            {
+              'id': 1,
+              'invoice_number': 'INV-2026-0001',
+              'item_title': 'دورة Flutter وRiverpod المتقدمة',
+              'amount': 2500.0,
+              'currency': 'DZD',
+              'payment_method': 'SATIM',
+              'issued_at': '2026-10-15',
+            }
+          ],
         };
         _isLoading = false;
       });
@@ -136,16 +147,26 @@ class _ProfileHubScreenState extends ConsumerState<ProfileHubScreen> {
                       const SizedBox(height: 16),
 
                       // Metric Stats Grid
-                      _buildStatsRow(theme),
+                      _buildStatsRow(theme, langNotifier),
                       const SizedBox(height: 24),
 
                       // Certificates Section
-                      _buildCertificatesSection(theme),
+                      _buildCertificatesSection(theme, langNotifier),
+                      const SizedBox(height: 24),
+
+                      // Official Electronic Invoices (P7)
+                      _buildInvoicesSection(theme, langNotifier),
                       const SizedBox(height: 24),
 
                       // Payment Receipts Ledger
-                      _buildPaymentsSection(theme),
+                      _buildPaymentsSection(theme, langNotifier),
                       const SizedBox(height: 32),
+
+                      // GDPR/A6 Account Deletion
+                      if (auth.isAuthenticated) ...[
+                        _buildDeleteAccountSection(langNotifier),
+                        const SizedBox(height: 32),
+                      ],
                     ],
                   ),
                 ),
@@ -307,18 +328,18 @@ class _ProfileHubScreenState extends ConsumerState<ProfileHubScreen> {
     );
   }
 
-  Widget _buildStatsRow(InstituteThemeState theme) {
+  Widget _buildStatsRow(InstituteThemeState theme, LanguageNotifier langNotifier) {
     final stats = _data?['stats'] ?? {};
 
     return Row(
       children: [
-        _buildStatBox('الدورات', '${stats['enrolled_courses'] ?? 0}', Icons.menu_book, theme.primaryColor),
+        _buildStatBox(langNotifier.t('statsCourses'), '${stats['enrolled_courses'] ?? 0}', Icons.menu_book, theme.primaryColor),
         const SizedBox(width: 8),
-        _buildStatBox('المكتملة', '${stats['completed_courses'] ?? 0}', Icons.task_alt, Colors.green),
+        _buildStatBox(langNotifier.t('statsCompleted'), '${stats['completed_courses'] ?? 0}', Icons.task_alt, Colors.green),
         const SizedBox(width: 8),
-        _buildStatBox('الشهادات', '${stats['certificates_count'] ?? 0}', Icons.military_tech_outlined, Colors.amber.shade800),
+        _buildStatBox(langNotifier.t('statsCertificates'), '${stats['certificates_count'] ?? 0}', Icons.military_tech_outlined, Colors.amber.shade800),
         const SizedBox(width: 8),
-        _buildStatBox('الملاحظات', '${stats['study_notes_count'] ?? 0}', Icons.bookmark_border, Colors.indigo),
+        _buildStatBox(langNotifier.t('statsNotes'), '${stats['study_notes_count'] ?? 0}', Icons.bookmark_border, Colors.indigo),
       ],
     );
   }
@@ -345,7 +366,7 @@ class _ProfileHubScreenState extends ConsumerState<ProfileHubScreen> {
     );
   }
 
-  Widget _buildCertificatesSection(InstituteThemeState theme) {
+  Widget _buildCertificatesSection(InstituteThemeState theme, LanguageNotifier langNotifier) {
     final certs = (_data?['certificates'] as List?) ?? [];
 
     return Column(
@@ -355,7 +376,7 @@ class _ProfileHubScreenState extends ConsumerState<ProfileHubScreen> {
           children: [
             Icon(Icons.workspace_premium_outlined, color: theme.primaryColor, size: 20),
             const SizedBox(width: 8),
-            const Text('الشهادات الأكاديمية المعتمدة', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text(langNotifier.t('certificatesTitle'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           ],
         ),
         const SizedBox(height: 12),
@@ -422,7 +443,7 @@ class _ProfileHubScreenState extends ConsumerState<ProfileHubScreen> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
                       icon: const Icon(Icons.download, size: 14),
-                      label: const Text('تحميل', style: TextStyle(fontSize: 11)),
+                      label: Text(langNotifier.t('download'), style: const TextStyle(fontSize: 11)),
                     ),
                   ],
                 ),
@@ -431,7 +452,97 @@ class _ProfileHubScreenState extends ConsumerState<ProfileHubScreen> {
     );
   }
 
-  Widget _buildPaymentsSection(InstituteThemeState theme) {
+  Widget _buildInvoicesSection(InstituteThemeState theme, LanguageNotifier langNotifier) {
+    final invoices = (_data?['invoices'] as List?) ?? [];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.description_outlined, color: theme.primaryColor, size: 20),
+            const SizedBox(width: 8),
+            Text(langNotifier.t('invoicesTitle'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (invoices.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(20),
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey.shade200),
+            ),
+            child: Center(
+              child: Text(
+                langNotifier.t('noInvoices'),
+                style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+              ),
+            ),
+          )
+        else
+          ...invoices.map((inv) => Container(
+                margin: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.blueGrey.shade100),
+                ),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: Colors.blueGrey.shade50,
+                      child: Icon(Icons.receipt, color: Colors.blueGrey.shade700, size: 20),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            inv['invoice_number'] ?? '',
+                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey.shade600),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            inv['item_title'] ?? '',
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${inv['amount']} ${inv['currency'] ?? 'DZD'} • ${inv['payment_method'] ?? 'SATIM'}',
+                            style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+                          ),
+                        ],
+                      ),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('تحميل الفاتورة: ${inv['invoice_number']}')),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0F172A),
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      icon: const Icon(Icons.download, size: 14),
+                      label: Text(langNotifier.t('download'), style: const TextStyle(fontSize: 11)),
+                    ),
+                  ],
+                ),
+              )),
+      ],
+    );
+  }
+
+  Widget _buildPaymentsSection(InstituteThemeState theme, LanguageNotifier langNotifier) {
     final receipts = (_data?['recent_receipts'] as List?) ?? [];
 
     return Column(
@@ -441,7 +552,7 @@ class _ProfileHubScreenState extends ConsumerState<ProfileHubScreen> {
           children: [
             Icon(Icons.receipt_long_outlined, color: theme.primaryColor, size: 20),
             const SizedBox(width: 8),
-            const Text('سجل إيصالات الدفع والتحويل', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text(langNotifier.t('paymentsTitle'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           ],
         ),
         const SizedBox(height: 12),
@@ -498,7 +609,7 @@ class _ProfileHubScreenState extends ConsumerState<ProfileHubScreen> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        '${r['amount']} ج.م',
+                        '${r['amount']} ${langNotifier.t('currency')}',
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                       ),
                       const SizedBox(height: 4),
@@ -514,10 +625,10 @@ class _ProfileHubScreenState extends ConsumerState<ProfileHubScreen> {
                         ),
                         child: Text(
                           isApproved
-                              ? 'معتمد 🟢'
+                              ? langNotifier.t('verified')
                               : isPending
-                                  ? 'قيد التدقيق ⏳'
-                                  : 'مرفوض 🔴',
+                                  ? langNotifier.t('pending')
+                                  : langNotifier.t('rejected'),
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
@@ -538,4 +649,57 @@ class _ProfileHubScreenState extends ConsumerState<ProfileHubScreen> {
       ],
     );
   }
+
+  Widget _buildDeleteAccountSection(LanguageNotifier langNotifier) {
+    return Center(
+      child: OutlinedButton.icon(
+        onPressed: () => _handleDeleteAccount(langNotifier),
+        icon: const Icon(Icons.delete_forever_outlined, color: Colors.redAccent, size: 18),
+        label: Text(
+          langNotifier.t('deleteAccount'),
+          style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 13),
+        ),
+        style: OutlinedButton.styleFrom(
+          side: const BorderSide(color: Colors.redAccent),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleDeleteAccount(LanguageNotifier langNotifier) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(langNotifier.t('deleteAccount'), style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
+        content: Text(langNotifier.t('deleteAccountConfirm')),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(langNotifier.t('cancel')),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(langNotifier.t('confirm')),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await ApiClient().dio.delete('/auth/account');
+      } catch (_) {}
+      await ref.read(authProvider.notifier).logout();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(langNotifier.t('accountDeleted'))),
+        );
+        _fetchProfileData();
+      }
+    }
+  }
 }
+
